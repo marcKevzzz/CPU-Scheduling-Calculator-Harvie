@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPU Scheduling</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div
+      id="toast-danger"
+      class="hidden flex items-center w-full max-w-xs px-2 p-1 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800 fixed sm:top-[4rem] top-[3rem] right-[1rem] z-50 transition-opacity duration-300 opacity-0"
+      role="alert"
+    >
+      <div
+        class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200"
+        id="no"
+      >
+        <svg
+          class="w-5 h-5"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"
+          />
+        </svg>
+        <span class="sr-only">Warning icon</span>
+      </div>
+      <div
+        class="hide inline-flex items-center justify-center shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200"
+        id="success"
+      >
+        <svg
+          class="w-5 h-5"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
+          />
+        </svg>
+        <span class="sr-only">Check icon</span>
+      </div>
+      <div class="ms-3 text-[14px] font-normal" id="toastLbl"></div>
+      <button
+        id="hideToast"
+        class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+        aria-label="Close"
+      >
+        <svg
+          class="w-3 h-3"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 14 14"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+          />
+        </svg>
+      </button>
+    </div>
+    <!-- Main Header -->
+    <div class="w-full text-center py-4">
+      <div class="bg-white inline-block px-6 py-2 text-4xl font-bold">
+        Central Processing Unit Scheduling
+      </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row">
+      <!-- INPUT SIDE -->
+      <div
+        class="container-bg p-4 mb-4 md:mb-0 md:mr-4 md:w-1/2 h-[fit-content]"
+      >
+        <div class="flex gap-4 items-center mb-4">
+          <div class="bg-white rounded-full p-2 inline-block">
+            <h2 class="font-bold text-xl px-4">INPUT:</h2>
+          </div>
+
+          <div class="relative inline-block text-left grow">
+            <input
+              type="hidden"
+              id="selected-priority"
+              name="priorityAlgorithm"
+            />
+
+            <div>
+              <button
+                type="button"
+                class="inline-flex w-full justify-between rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+                id="menu-button"
+                aria-expanded="false"
+                aria-haspopup="true"
+                onclick="toggleDropdown()"
+              >
+                Insert the Name of Priority:
+                <svg
+                  class="-mr-1 ml-2 size-5 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div
+              id="dropdown-menu"
+              class="hidden absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+              role="menu"
+              aria-labelledby="menu-button"
+            >
+              <div class="py-1">
+                <button
+                  class="w-full algo-btn text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  data-value="FCFS"
+                >
+                  FIRST COME FIRST SERVE
+                </button>
+                <button
+                  class="w-full algo-btn text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  data-value="SJF"
+                >
+                  SHORTEST JOB FIRST
+                </button>
+                <button
+                  class="w-full algo-btn text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  data-value="NPP"
+                >
+                  NON-PREEMPTIVE PRIORITY
+                </button>
+                <button
+                  class="w-full algo-btn text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  data-value="SRTF"
+                >
+                  SHORTEST REMAINING TIME FIRST
+                </button>
+                <button
+                  class="w-full algo-btn text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  data-value="RR"
+                >
+                  ROUND ROBIN
+                </button>
+                <button
+                  class="w-full algo-btn text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  data-value="PP"
+                >
+                  PREEMPTIVE PRIORITY
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jobs Table -->
+        <div class="mb-4">
+          <h3 class="font-mono text-white font-bold text-center mb-2 underline">
+            JOBS
+          </h3>
+          <div class="rounded-md overflow-hidden">
+            <table class="bg-white w-full border-collapse" id="processTable">
+              <thead>
+                <tr>
+                  <th class="border border-gray-400 p-1">Jobs</th>
+                  <th class="border border-gray-400 p-1">At</th>
+                  <th class="border border-gray-400 p-1">Bt</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-gray-400 p-1 jobs">J1</td>
+                  <td class="border border-gray-400 p-1">
+                    <input
+                      class="input border-0 outline-0 w-full bg-transparent drop-shadow-none ps-1 ring-0 input py-2"
+                      type="number"
+                      min="0"
+                    />
+                  </td>
+                  <td class="border border-gray-400 p-1">
+                    <input
+                      class="input border-0 outline-0 w-full bg-transparent drop-shadow-none ps-1 ring-0 input py-2"
+                      type="number"
+                      min="0"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-400 p-1 jobs">J2</td>
+                  <td class="border border-gray-400 p-1">
+                    <input
+                      class="input border-0 outline-0 w-full bg-transparent drop-shadow-none ps-1 ring-0 input py-2"
+                      type="number"
+                      min="0"
+                    />
+                  </td>
+                  <td class="border border-gray-400 p-1">
+                    <input
+                      class="input border-0 outline-0 w-full bg-transparent drop-shadow-none ps-1 ring-0 input py-2"
+                      type="number"
+                      min="0"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-400 p-1 jobs">J3</td>
+                  <td class="border border-gray-400 p-1">
+                    <input
+                      class="input border-0 outline-0 w-full bg-transparent drop-shadow-none ps-1 ring-0 input py-2"
+                      type="number"
+                      min="0"
+                    />
+                  </td>
+                  <td class="border border-gray-400 p-1">
+                    <input
+                      class="input border-0 outline-0 w-full bg-transparent drop-shadow-none ps-1 ring-0 input py-2"
+                      type="number"
+                      min="0"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="text-white font-mono text-sm mt-2 flex justify-between">
+            <button class="ml-2 cursor-pointer" id="addRow">
+              <span class="no-underline">+ </span
+              ><span class="underline">Add Row</span>
+            </button>
+            <button class="mr-2 cursor-pointer" id="deleteRow">
+              <span class="underline">Delete Row</span
+              ><span class="no-underline"> - </span>
+            </button>
+          </div>
+
+          <div class="flex flex-col mt-[2rem] gap-2">
+            <button
+              class="rounded-full border border-white text-white p-2 px-6 grow cursor-pointer hover:bg-white hover:text-black transition-colors duration-200"
+              id="calculate"
+            >
+              CALCULATE
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUTPUT SIDE -->
+      <div class="output-bg p-4 md:w-1/2">
+        <div class="flex gap-6 items-center">
+          <div class="bg-white rounded-full p-2 inline-block mb-4">
+            <h2 class="font-bold text-xl px-4">OUTPUT:</h2>
+          </div>
+
+          <div class="flex justify-center items-center h-full text-white mb-4 hide" id="animate-spin">
+            <span class="animate-spin inline-block [animation-duration:2s] flex justify-center items-center pb-2">⟳</span>
+            <span class="ml-2">Generating Input...</span>
+          </div>
+
+          <div class="text-white text-right hidden mb-4 " id="lbll">
+            Input Generated Successfully!
+          </div>
+        </div>
+        <!-- TIMELINE OUTPUT -->
+        <div class="mb-4">
+          <h3 class="font-mono font-bold text-center mb-2 underline text-white">
+            TIMELINE
+          </h3>
+          <div class="bg-white p-2 rounded" id="timeline-bg">
+            <div class="flex flex-row mx-auto" id="timeline">
+              <div class="flex items-center justify-between px-4 py-4 oo">
+                <div class="timeline-vrline"></div>
+                <div class="timeline-circle flex">
+                  <div
+                    class="border-r-1 border-black md:w-[40px] h-[20px] w-[30px]"
+                  ></div>
+                  <div
+                    class="border-l-1 border-black md:w-[40px] h-[20px] w-[30px]"
+                  ></div>
+                </div>
+                <div class="timeline-circle flex">
+                  <div
+                    class="border-r-1 border-black md:w-[40px] h-[20px] w-[30px]"
+                  ></div>
+                  <div
+                    class="border-l-1 border-black md:w-[40px] h-[20px] w-[30px]"
+                  ></div>
+                </div>
+                <div class="timeline-circle flex">
+                  <div
+                    class="border-r-1 border-black md:w-[40px] h-[20px] w-[30px]"
+                  ></div>
+                  <div
+                    class="border-l-1 border-black md:w-[40px] h-[20px] w-[30px]"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GANTT CHART OUTPUT -->
+        <div class="mb-4">
+          <h3 class="font-mono font-bold text-center mb-2 underline text-white">
+            GANTT CHART
+          </h3>
+
+          <div
+            id="ganttChart"
+            class="mt-2 select-none flex flex-col w-full rounded p-4 bg-white"
+          >
+            <div id="head" class="flex flex-row"></div>
+            <div id="gbody" class="flex flex-row items-center w-full">
+              <div
+                class="flex p-2 rounded sm:w-[25em] w-[15em] mx-auto items-center"
+              >
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+                <div class="border border-gray-400 w-[40px] gantt-box"></div>
+              </div>
+            </div>
+            <div id="tail" class="flex flex-row"></div>
+            <div id="queue" class="flex flex-row"></div>
+          </div>
+        </div>
+
+        <!-- TURN AROUND TIME OUTPUT -->
+        <div class="mb-4">
+          <h3 class="font-mono font-bold text-center mb-2 underline text-white">
+            TURN AROUND TIME
+          </h3>
+          <div class="rounded-md overflow-hidden">
+            <table
+              class="bg-white w-full border-collapse rounded"
+              id="resultTable"
+            >
+              <tbody>
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono">tt1</td>
+                  <td class="border border-gray-400 p-2"></td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono">tt2</td>
+                  <td class="border border-gray-400 p-2 w-[18rem]"></td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono">tt3</td>
+                  <td class="border border-gray-400 p-2"></td>
+                </tr>
+
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono w-[18rem]">
+                    ttave
+                  </td>
+                  <td class="border border-gray-400 p-2"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- WAITING TIME OUTPUT -->
+        <div class="mb-4">
+          <h3 class="font-mono font-bold text-center mb-2 underline text-white">
+            WAITING TIME
+          </h3>
+          <div class="rounded-md overflow-hidden">
+            <table
+              class="bg-white w-full border-collapse rounded"
+              id="resultTableWaitingTime"
+            >
+              <tbody>
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono">wt1</td>
+                  <td class="border border-gray-400 p-2 w-[18rem]"></td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono">wt2</td>
+                  <td class="border border-gray-400 p-2 w-[18rem]"></td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono">wt3</td>
+                  <td class="border border-gray-400 p-2 w-[18rem]"></td>
+                </tr>
+
+                <tr>
+                  <td class="border border-gray-400 p-2 font-mono w-[18rem]">
+                    wtave
+                  </td>
+                  <td class="border border-gray-400 p-2"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- CPU UTILIZATION OUTPUT -->
+        <div class="mb-4">
+          <h3 class="font-mono font-bold text-center mb-2 underline text-white">
+            % OF CPU UTILIZATION
+          </h3>
+          <div class="bg-white p-4 rounded">
+            <div
+              class="text-center flex sm:flex-row flex-col gap-4 sm:gap-0 items-center justify-center"
+              id="cpuResult"
+            >
+              <div
+                class="w-[fit-content] flex flex-col items-center justify-center"
+              >
+                <span class="inline-block pb-1" id="process"> </span>
+                <span
+                  class="inline-block pt-2 ml-1 mr-1 border-t border-black tracking-tight"
+                  id="completion"
+                >
+                </span>
+              </div>
+              <div class="flex flex-row items-center">
+                <span class="ml-2 mr-2"> = </span>
+                <div
+                  class="w-[fit-content] flex flex-col items-center justify-center"
+                >
+                  <span
+                    class="inline-block border-b border-black pb-1 tracking-tighter"
+                    id="adds"
+                  >
+                  </span>
+                  <span class="inline-block pt-1" id="burstt"> </span>
+                </div>
+                <span class="ml-2 mr-2"> × 100 = </span>
+                <span
+                  class="inline-block border-2 border-black rounded-md bg-white px-3 py-1 hide"
+                  id="cpuTotal"
+                >
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Restart Button -->
+        <div class="text-center pt-4 cursor-pointer">
+          <button
+            class="bg-transparent border border-gray-300 text-gray-300 rounded-full p-2 px-5 cursor-pointer hover:bg-white hover:text-black transition-colors duration-200"
+            id="clear"
+          >
+            ↻ Restart
+          </button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="script.js"></script>
+    <script>
+      function toggleDropdown() {
+        document.getElementById("dropdown-menu").classList.toggle("hidden");
+      }
+
+      const dropdownItems = document.querySelectorAll("#dropdown-menu button");
+      const menuButton = document.getElementById("menu-button");
+      const hiddenInput = document.getElementById("selected-priority");
+
+      dropdownItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          const value = item.getAttribute("data-value");
+          const text = item.textContent;
+          hiddenInput.value = value;
+          menuButton.innerHTML = `
+        ${text}
+        <svg class="-mr-1 ml-2 size-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z" clip-rule="evenodd"/>
+        </svg>
+      `;
+          toggleDropdown();
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        const dropdown = document.getElementById("dropdown-menu");
+        const button = document.getElementById("menu-button");
+        if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+          dropdown.classList.add("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>

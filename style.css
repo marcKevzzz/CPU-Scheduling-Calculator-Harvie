@@ -1,0 +1,108 @@
+.jobs {
+  text-align: center;
+  padding-inline: 2em;
+}
+
+body {
+  background-color: #a4c3e2;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236a8eb5' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.container-bg {
+  background-color: rgba(46, 71, 93, 0.85);
+  border-radius: 10px;
+}
+.output-bg {
+  background-color: rgba(46, 71, 93, 0.85);
+  border-radius: 10px;
+}
+.gantt-box {
+  min-height: 40px;
+}
+
+.timeline-line {
+  height: 2px;
+  background-color: white;
+}
+#priorityAlgorithm option {
+  padding-block: 2em;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.slashed {
+  position: relative;
+  display: inline-block;
+}
+.slashed::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -5%;
+  height: 2px;
+  width: 30%;
+  background: rgba(0, 0, 0, 0.753);
+  transform: rotate(25deg);
+}
+
+.animate-spin {
+  font-size: 1.8em;
+}
+
+.left {
+  margin-left: -40px;
+}
+
+#ganttChart {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+#timeline-bg {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#timeline {
+  white-space: nowrap;
+  align-items: flex-end;
+  position: relative;
+  width: fit-content;
+}
+
+.timeline-block {
+  border-radius: 4px;
+  border: none;
+  position: relative;
+}
+
+.timeline-vrline {
+  width: calc(100% - 70px);
+  border-top: 2px solid #000000;
+  position: absolute;
+  top: 48%;
+  left: 35px;
+}
+
+.line {
+  width: 0;
+  border-left: 1px solid #000000;
+  height: 100%;
+}
+
+.hide {
+  display: none;
+}
+
+.dropdown-arrow {
+  width: 2px;
+  height: 20px;
+  background-color: #000000;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
